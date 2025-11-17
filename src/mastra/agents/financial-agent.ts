@@ -1,6 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { anthropic } from "@ai-sdk/anthropic";
-// We'll import our tool in a later step
+import { Memory } from "@mastra/memory";
+import { LibSQLStore } from "@mastra/libsql";
+import { getTransactionsTool } from "../tools/get-transactions-tool";
 
 export const financialAgent = new Agent({
   name: "Financial Assistant Agent",
@@ -29,7 +31,11 @@ CONSTRAINTS & BOUNDARIES
 SUCCESS CRITERIA
 - Deliver accurate and helpful analysis of transaction data.
 - Achieve high user satisfaction through clear and helpful responses.
-- Maintain user trust by ensuring data privacy and security.`,
+- Maintain user trust by ensuring data privacy and security.
+
+TOOLS
+- Use the getTransactions tool to fetch financial transaction data.
+- Analyze the transaction data to answer user questions about their spending.`,
   model: anthropic("claude-haiku-4-5-20251001"),
-  tools: {}, // We'll add tools in a later step
+  tools: { getTransactionsTool },
 });
