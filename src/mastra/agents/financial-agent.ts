@@ -38,4 +38,9 @@ TOOLS
 - Analyze the transaction data to answer user questions about their spending.`,
   model: anthropic("claude-haiku-4-5-20251001"),
   tools: { getTransactionsTool },
+  memory: new Memory({
+    storage: new LibSQLStore({
+      url: "file:../../memory.db", // local file-system database. Location is relative to the output directory `.mastra/output`
+    }),
+  }),
 });
