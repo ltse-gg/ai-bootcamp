@@ -4,6 +4,7 @@ import { LibSQLStore } from "@mastra/libsql";
 import { MCPClient } from "@mastra/mcp";
 import { Memory } from "@mastra/memory";
 import { createSmitheryUrl } from "@smithery/sdk";
+import path from "path";
 import { getTransactionsTool } from "../tools/get-transactions-tool";
 
 const smitheryGithubMCPServerUrl = createSmitheryUrl(
@@ -25,6 +26,14 @@ const mcp = new MCPClient({
     hackernews: {
       command: "npx",
       args: ["-y", "@devabdultech/hn-mcp-server"],
+    },
+    textEditor: {
+      command: "npx",
+      args: [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        path.join(process.cwd(), "..", "..", "notes"), // relative to output directory
+      ],
     },
   },
 });
@@ -81,7 +90,13 @@ You also have access to the following MCP tools:
    - Use this tool to search for stories on Hacker News
    - You can get the top stories or specific stories
    - You can retrieve comments for stories
-   - Useful for staying informed about tech news and trends`,
+   - Useful for staying informed about tech news and trends
+
+4. Filesystem:
+   - You have filesystem read/write access to a notes directory
+   - You can use this to store financial reports, transaction summaries, or insights for later use
+   - You can keep track of financial goals, budgets, or to-do items for the user
+   - Notes dir: ${path.join(process.cwd(), "..", "..", "notes")}`,
   model: anthropic("claude-haiku-4-5-20251001"),
   tools: { ...mcpTools, getTransactionsTool }, // Add MCP tools to your agent
   memory: new Memory({
