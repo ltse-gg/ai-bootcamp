@@ -28,23 +28,29 @@ const memory = new Memory({
 # User Profile
 
 ## Personal Info
-
 - Name:
 - Location:
 - Timezone:
+- Occupation:
 
 ## Preferences
+- Communication Style:
+- Topics of Interest:
+- Learning Goals:
 
-- Communication Style: [e.g., Formal, Casual]
-- Interests:
-- Favorite Topics:
+## Project Information
+- Current Projects:
+  - [Project 1]:
+    - Deadline:
+    - Status:
+  - [Project 2]:
+    - Deadline:
+    - Status:
 
 ## Session State
-
 - Current Topic:
 - Open Questions:
-  - [Question 1]
-  - [Question 2]
+- Action Items:
 `,
     },
   },
