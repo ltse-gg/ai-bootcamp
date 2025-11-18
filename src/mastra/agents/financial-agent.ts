@@ -1,6 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
+import { openai } from "@ai-sdk/openai";
 import { Agent } from "@mastra/core/agent";
-import { LibSQLStore } from "@mastra/libsql";
+import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 import { MCPClient } from "@mastra/mcp";
 import { Memory } from "@mastra/memory";
 import { createSmitheryUrl } from "@smithery/sdk";
@@ -96,12 +97,54 @@ You also have access to the following MCP tools:
    - You have filesystem read/write access to a notes directory
    - You can use this to store financial reports, transaction summaries, or insights for later use
    - You can keep track of financial goals, budgets, or to-do items for the user
-   - Notes dir: ${path.join(process.cwd(), "..", "..", "notes")}`,
+   - Notes dir: ${path.join(process.cwd(), "..", "..", "notes")}
+
+MEMORY CAPABILITIES
+You have access to conversation memory and can remember details about users.
+When you learn something about a user, update their working memory using the appropriate tool.
+This includes:
+- Their financial goals and objectives
+- Their budget preferences and spending limits
+- Their spending patterns and habits
+- Their conversation style (formal, casual, etc.)
+- Any other relevant information that would help personalize financial advice
+
+Always maintain a helpful and professional tone.
+Use the stored information to provide more personalized financial insights and recommendations.`,
   model: anthropic("claude-haiku-4-5-20251001"),
   tools: { ...mcpTools, getTransactionsTool }, // Add MCP tools to your agent
   memory: new Memory({
     storage: new LibSQLStore({
       url: "file:../../memory.db", // local file-system database. Location is relative to the output directory `.mastra/output`
     }),
+    vector: new LibSQLVector({
+      connectionUrl: "file:../../memory.db",
+    }),
+    embedder: openai.embedding("text-embedding-3-small"),
+    options: {
+      // Keep last 20 messages in context
+      lastMessages: 20,
+      // Enable semantic search to find relevant past conversations
+      semanticRecall: {
+        topK: 3,
+        messageRange: {
+          before: 2,
+          after: 1,
+        },
+      },
+      // Enable working memory to remember user information
+      workingMemory: {
+        enabled: true,
+        template: `
+        <user>
+           <first_name></first_name>
+           <username></username>
+           <financial_goals></financial_goals>
+           <budget_preferences></budget_preferences>
+           <spending_patterns></spending_patterns>
+           <conversation_style></conversation_style>
+         </user>`,
+      },
+    },
   }),
 });
