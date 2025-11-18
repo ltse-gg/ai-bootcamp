@@ -127,6 +127,7 @@ Use the stored information to provide more personalized financial insights and r
       // Enable semantic search to find relevant past conversations
       semanticRecall: {
         topK: 3,
+        scope: 'resource',
         messageRange: {
           before: 2,
           after: 1,
@@ -135,6 +136,7 @@ Use the stored information to provide more personalized financial insights and r
       // Enable working memory to remember user information
       workingMemory: {
         enabled: true,
+        scope: 'resource',
         template: `
         <user>
            <first_name></first_name>
