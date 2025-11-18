@@ -1,8 +1,8 @@
-import { Agent } from "@mastra/core/agent";
-import { Memory } from "@mastra/memory";
-import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
-import { anthropic } from "@ai-sdk/anthropic";
 import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@lib/anthropic";
+import { Agent } from "@mastra/core/agent";
+import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
+import { Memory } from "@mastra/memory";
 
 // Create a memory instance with semantic recall configuration
 const memory = new Memory({

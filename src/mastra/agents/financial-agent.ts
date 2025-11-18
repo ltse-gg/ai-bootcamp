@@ -1,5 +1,5 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@lib/anthropic";
 import { Agent } from "@mastra/core/agent";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 import { MCPClient } from "@mastra/mcp";
@@ -127,7 +127,7 @@ Use the stored information to provide more personalized financial insights and r
       // Enable semantic search to find relevant past conversations
       semanticRecall: {
         topK: 3,
-        scope: 'resource',
+        scope: "resource",
         messageRange: {
           before: 2,
           after: 1,
@@ -136,7 +136,7 @@ Use the stored information to provide more personalized financial insights and r
       // Enable working memory to remember user information
       workingMemory: {
         enabled: true,
-        scope: 'resource',
+        scope: "resource",
         template: `
         <user>
            <first_name></first_name>

@@ -1,5 +1,5 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@lib/anthropic";
 import { Agent } from "@mastra/core/agent";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 import { MCPClient } from "@mastra/mcp";
