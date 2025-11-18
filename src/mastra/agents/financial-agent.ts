@@ -75,7 +75,13 @@ You also have access to the following MCP tools:
 2. GitHub:
    - Use these tools for monitoring and summarizing GitHub activity
    - You can summarize recent commits, pull requests, issues, and development patterns
-   - Useful for tracking project development and repository activity`,
+   - Useful for tracking project development and repository activity
+
+3. Hacker News:
+   - Use this tool to search for stories on Hacker News
+   - You can get the top stories or specific stories
+   - You can retrieve comments for stories
+   - Useful for staying informed about tech news and trends`,
   model: anthropic("claude-haiku-4-5-20251001"),
   tools: { ...mcpTools, getTransactionsTool }, // Add MCP tools to your agent
   memory: new Memory({
