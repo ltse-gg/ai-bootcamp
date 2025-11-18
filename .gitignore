@@ -11,7 +11,7 @@ build
 output.txt
 
 # Mastra specific
-.mastra
+.mastra/
 
 # Environment variables
 .env
