@@ -56,6 +56,8 @@ const claudeCliResponseSchema = z.object({
 type ClaudeCliResponse = z.infer<typeof claudeCliResponseSchema>;
 
 const CLAUDE_CLI_SANDBOX_DIR = process.env.CLAUDE_CLI_SANDBOX_DIR || "/tmp/claude-cli-sandbox";
+const CLAUDE_CLI_ALLOWED_TOOLS = "Bash,Read,Write,Edit,Glob,Grep";
+const CLAUDE_CLI_MODEL = "haiku";
 
 /**
  * Tool for executing Claude Code CLI in headless mode
@@ -67,45 +69,22 @@ export const claudeCliTool = createTool({
     "Executes Claude Code CLI in headless mode to perform coding tasks. Claude CLI has access to file operations, git, bash, and other tools. Use this to delegate complex coding tasks.",
   inputSchema: z.object({
     prompt: z.string().describe("The task or question to send to Claude CLI"),
-    model: z
-      .enum(["sonnet", "opus", "haiku"])
-      .default("haiku")
-      .describe("Model to use (sonnet, opus, or haiku). Defaults to haiku."),
-    continueSession: z.boolean().optional().describe("Continue the most recent session"),
     sessionId: z.string().optional().describe("Resume a specific session by ID"),
     systemPrompt: z.string().optional().describe("Additional system instructions to append"),
-    allowedTools: z
-      .array(z.string())
-      .default(["Bash,Read"])
-      .describe("Whitelist of tools Claude can use"),
-    disallowedTools: z
-      .array(z.string())
-      .optional()
-      .describe("Blacklist of tools Claude cannot use"),
   }),
   outputSchema: claudeCliResponseSchema.extend({
     success: z.boolean().describe("Whether the command executed successfully"),
     error: z.string().optional().describe("Error message if command failed or stderr output"),
   }),
   execute: async ({ context }) => {
-    const {
-      prompt,
-      model,
-      continueSession,
-      sessionId,
-      systemPrompt,
-      allowedTools,
-      disallowedTools,
-    } = context;
+    const { prompt, sessionId, systemPrompt } = context;
 
     // Build the command
-    let command = `claude -p "${prompt.replace(/"/g, '\\"')}" --output-format json --model ${model}`;
+    let command = `claude -p "${prompt.replace(/"/g, '\\"')}" --output-format json --model ${CLAUDE_CLI_MODEL}`;
 
     // Add session management flags
     if (sessionId) {
       command += ` --resume "${sessionId}"`;
-    } else if (continueSession) {
-      command += ` --continue`;
     }
 
     // Add system prompt if provided
@@ -113,13 +92,8 @@ export const claudeCliTool = createTool({
       command += ` --append-system-prompt "${systemPrompt.replace(/"/g, '\\"')}"`;
     }
 
-    // Add tool restrictions if provided
-    if (allowedTools && allowedTools.length > 0) {
-      command += ` --allowedTools="${allowedTools.join(",")}"`;
-    }
-    if (disallowedTools && disallowedTools.length > 0) {
-      command += ` --disallowedTools="${disallowedTools.join(",")}"`;
-    }
+    // Tool restrictions
+    command += ` --allowedTools = ${CLAUDE_CLI_ALLOWED_TOOLS}`;
 
     // Allow edits
     command += ` --permission-mode acceptEdits`;
