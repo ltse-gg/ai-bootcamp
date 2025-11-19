@@ -74,7 +74,10 @@ export const claudeCliTool = createTool({
     continueSession: z.boolean().optional().describe("Continue the most recent session"),
     sessionId: z.string().optional().describe("Resume a specific session by ID"),
     systemPrompt: z.string().optional().describe("Additional system instructions to append"),
-    allowedTools: z.array(z.string()).optional().describe("Whitelist of tools Claude can use"),
+    allowedTools: z
+      .array(z.string())
+      .default(["Bash,Read"])
+      .describe("Whitelist of tools Claude can use"),
     disallowedTools: z
       .array(z.string())
       .optional()
@@ -117,6 +120,9 @@ export const claudeCliTool = createTool({
     if (disallowedTools && disallowedTools.length > 0) {
       command += ` --disallowedTools="${disallowedTools.join(",")}"`;
     }
+
+    // Allow edits
+    command += ` --permission-mode acceptEdits`;
 
     // Redirect stdin from /dev/null to prevent hanging
     command += ` < /dev/null`;
