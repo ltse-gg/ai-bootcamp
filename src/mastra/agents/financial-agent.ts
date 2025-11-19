@@ -40,7 +40,6 @@ const mcp = new MCPClient({
 });
 
 const mcpTools = await mcp.getTools();
-console.log("MCP Tools:", Object.keys(mcpTools));
 
 export const financialAgent = new Agent({
   name: "Financial Assistant Agent",

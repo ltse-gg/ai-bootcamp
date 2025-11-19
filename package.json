@@ -29,6 +29,7 @@
     "@mastra/mcp": "^0.14.2",
     "@mastra/memory": "^0.15.11",
     "@smithery/sdk": "^1.7.4",
+    "dotenv": "^17.2.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {

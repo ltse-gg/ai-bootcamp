@@ -20,7 +20,6 @@ const mcp = new MCPClient({
 });
 
 const mcpTools = await mcp.getTools();
-console.log("MCP Tools:", Object.keys(mcpTools));
 
 // Create a specialized memory configuration for the learning assistant
 const learningMemory = new Memory({
