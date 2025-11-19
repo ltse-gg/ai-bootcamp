@@ -1,7 +1,7 @@
 import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore } from "@mastra/libsql";
 import { PinoLogger } from "@mastra/loggers";
-import { contentAgent } from "./agents/content-agent";
+import { codingAgent } from "./agents/coding-agent";
 import { financialAgent } from "./agents/financial-agent";
 import { learningAssistantAgent } from "./agents/learning-assistant";
 import { memoryAgent } from "./agents/memory-agent";
@@ -29,7 +29,13 @@ export const mastra = new Mastra({
     conditionalWorkflow,
     paymentWorkflow,
   },
-  agents: { weatherAgent, financialAgent, memoryAgent, learningAssistantAgent, contentAgent },
+  agents: {
+    codingAgent,
+    weatherAgent,
+    financialAgent,
+    memoryAgent,
+    learningAssistantAgent,
+  },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   storage: new LibSQLStore({
     // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
