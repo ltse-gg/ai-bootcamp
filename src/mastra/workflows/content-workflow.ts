@@ -448,8 +448,7 @@ const assessContentStep = createStep({
     if (wordCount >= 200) category = "long";
 
     // Determine complexity by average word length
-    const avgWordLength =
-      words.reduce((sum, word) => sum + word.length, 0) / wordCount;
+    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / wordCount;
     let complexity: "simple" | "moderate" | "complex" = "simple";
     if (avgWordLength > 5) complexity = "moderate";
     if (avgWordLength > 7) complexity = "complex";
@@ -487,10 +486,7 @@ const quickProcessingStep = createStep({
     return {
       processedContent: inputData.content,
       processingType: "quick",
-      recommendations: [
-        "Content is concise",
-        "Consider expanding for more detail",
-      ],
+      recommendations: ["Content is concise", "Consider expanding for more detail"],
     };
   },
 });
@@ -514,7 +510,7 @@ const generalProcessingStep = createStep({
     console.log("📝 General processing for non-short/simple content...");
 
     // Simulate more involved processing
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await sleep(500);
 
     return {
       processedContent: inputData.content,
@@ -527,3 +523,32 @@ const generalProcessingStep = createStep({
     };
   },
 });
+
+export const conditionalWorkflow = createWorkflow({
+  id: "conditional-workflow",
+  description: "Content processing with conditional branching",
+  inputSchema: z.object({
+    content: z.string(),
+    type: z.enum(["article", "blog", "social"]).default("article"),
+  }),
+  outputSchema: z.object({
+    processedContent: z.string(),
+    processingType: z.string(),
+    recommendations: z.array(z.string()),
+  }),
+})
+  .then(assessContentStep)
+  .branch([
+    // Branch 1: Short and simple content
+    [
+      async ({ inputData }) => inputData.category === "short" && inputData.complexity === "simple",
+      quickProcessingStep,
+    ],
+    // Branch 2: Everything else
+    [
+      async ({ inputData }) =>
+        !(inputData.category === "short" && inputData.complexity === "simple"),
+      generalProcessingStep,
+    ],
+  ])
+  .commit();

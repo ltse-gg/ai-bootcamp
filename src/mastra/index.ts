@@ -1,18 +1,32 @@
-
-import { Mastra } from '@mastra/core/mastra';
-import { PinoLogger } from '@mastra/loggers';
-import { LibSQLStore } from '@mastra/libsql';
-import { weatherWorkflow } from './workflows/weather-workflow';
-import { contentWorkflow, aiContentWorkflow, parallelAnalysisWorkflow } from './workflows/content-workflow';
-import { weatherAgent } from './agents/weather-agent';
-import { financialAgent } from './agents/financial-agent';
-import { memoryAgent } from './agents/memory-agent';
-import { learningAssistantAgent } from './agents/learning-assistant';
-import { contentAgent } from './agents/content-agent';
-import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
+import { Mastra } from "@mastra/core/mastra";
+import { LibSQLStore } from "@mastra/libsql";
+import { PinoLogger } from "@mastra/loggers";
+import { contentAgent } from "./agents/content-agent";
+import { financialAgent } from "./agents/financial-agent";
+import { learningAssistantAgent } from "./agents/learning-assistant";
+import { memoryAgent } from "./agents/memory-agent";
+import { weatherAgent } from "./agents/weather-agent";
+import {
+  completenessScorer,
+  toolCallAppropriatenessScorer,
+  translationScorer,
+} from "./scorers/weather-scorer";
+import {
+  aiContentWorkflow,
+  conditionalWorkflow,
+  contentWorkflow,
+  parallelAnalysisWorkflow,
+} from "./workflows/content-workflow";
+import { weatherWorkflow } from "./workflows/weather-workflow";
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow, contentWorkflow, aiContentWorkflow, parallelAnalysisWorkflow },
+  workflows: {
+    weatherWorkflow,
+    contentWorkflow,
+    aiContentWorkflow,
+    parallelAnalysisWorkflow,
+    conditionalWorkflow,
+  },
   agents: { weatherAgent, financialAgent, memoryAgent, learningAssistantAgent, contentAgent },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   storage: new LibSQLStore({
@@ -21,15 +35,15 @@ export const mastra = new Mastra({
     url: "file:../../mastra.db",
   }),
   logger: new PinoLogger({
-    name: 'Mastra',
-    level: 'info',
+    name: "Mastra",
+    level: "info",
   }),
   telemetry: {
     // Telemetry is deprecated and will be removed in the Nov 4th release
-    enabled: false, 
+    enabled: false,
   },
   observability: {
     // Enables DefaultExporter and CloudExporter for AI tracing
-    default: { enabled: true }, 
+    default: { enabled: true },
   },
 });
