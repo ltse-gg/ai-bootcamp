@@ -6,8 +6,8 @@ import { Memory } from "@mastra/memory";
 import { claudeCliTool } from "../tools/claude-cli-tool";
 
 /**
- * Memory configuration for the coding agent
- * Tracks session ID and current task information
+ * Memory configuration for the client management assistant
+ * Tracks session ID and current client management task
  */
 const codingMemory = new Memory({
   storage: new LibSQLStore({
@@ -29,28 +29,32 @@ const codingMemory = new Memory({
     workingMemory: {
       enabled: true,
       template: `
-# Coding Agent Working Memory
+# Client Management Assistant - Working Memory
 
 ## Claude CLI Session ID
 - Current Session ID: [session_id from latest Claude CLI response]
 
-## Current Task
-- Description: [what the user asked for]
+## Current Client Management Task
+- Business Owner's Request: [what they want to do with client data]
 - Status: [in progress / completed / needs clarification]
 - Generated Script Location: [file path where script was saved]
+
+## Client Data Context
+- Data Structure: [how client data is stored and accessed]
+- Relevant Fields: [client fields being used in current/recent tasks]
 `,
     },
   },
 });
 
 /**
- * Coding Agent that uses Claude Code CLI in headless mode
- * to perform code-related tasks
+ * Client Management Assistant
+ * Helps business owners manage client data by generating scripts via Claude Code CLI
  */
 export const codingAgent = new Agent({
-  name: "Coding Agent",
+  name: "Client Management Assistant",
   description:
-    "An AI agent that uses Claude Code CLI to analyze, modify, and work with code. It can perform file operations, git commands, and other development tasks by delegating to Claude CLI.",
+    "An AI agent that helps business owners manage and analyze their client data by generating custom scripts. Translates business needs into working code through Claude Code CLI.",
   instructions: `You are a client management assistant that helps business owners manage and analyze their client data through custom scripts.
 
 YOUR ROLE:
@@ -88,35 +92,40 @@ WORKFLOW:
    - How to run it to get their results
 
 MEMORY USAGE:
-- Store Claude CLI session IDs in working memory for each task/conversation
-- Track project context: structure, technologies, conventions
-- Remember user preferences and patterns
-- Use semantic recall to reference previous scripts and decisions
+- Store Claude CLI session IDs in working memory for each client management task
+- Remember the business owner's data structure (e.g., how client data is stored, what fields exist)
+- Track completed client management scripts for reference
+- Use semantic recall to reference previous similar client queries
 
 SESSION MANAGEMENT (CRITICAL):
 - Extract the session_id from Claude CLI responses
-- Store it in working memory under "Claude CLI Session ID" for the current task
+- Store it in working memory under "Claude CLI Session ID"
 - ALWAYS include sessionId parameter in follow-up calls to claude-cli-headless tool
-- This allows Claude CLI to maintain context across multiple interactions
+- This allows Claude CLI to maintain context across multiple interactions for the same task
 
 HANDLING CLAUDE CLI RESPONSES:
-- If Claude CLI asks questions or needs clarification, analyze whether you can answer
-- If yes: Call claude-cli-headless again with sessionId and your answer
-- If no: Ask the user for clarification, then relay their answer to Claude CLI with sessionId
-- When script generation is complete, tell the user the file path where it was saved
+- If Claude CLI asks questions about client data structure or business logic:
+  * Try to answer based on your working memory and conversation context
+  * If you don't know, ask the business owner in simple, non-technical terms
+- Call claude-cli-headless again with sessionId and your answer/clarification
+- When script generation is complete, tell the business owner:
+  * What the script does (in business terms)
+  * Where it was saved
+  * How to run it
 
 BEST PRACTICES:
-- Be clear and specific when prompting Claude CLI
-- Always specify that you want a SCRIPT to be generated
+- Use business-friendly language when talking to the business owner
+- Be specific when prompting Claude CLI about client data requirements
+- Always specify that you want a SCRIPT to be generated for client management
 - Maintain session continuity with sessionId for multi-turn interactions
-- Update working memory with session IDs and task outcomes
-- Be concise when relaying information to the user
+- Update working memory with session IDs and task descriptions
+- Explain technical concepts in simple terms when needed
 
 CONSTRAINTS:
 - Always use claude-cli-headless tool for script generation
 - Never attempt to write code yourself - delegate to Claude CLI
 - Always pass sessionId for continuation of a conversation with Claude CLI
-- Focus on script generation as the primary output`,
+- Focus on client management use cases (filtering, analysis, reporting, etc.)`,
 
   model: anthropic("claude-sonnet-4-5-20250929"),
 
