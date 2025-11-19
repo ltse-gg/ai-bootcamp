@@ -17,6 +17,7 @@ import {
   contentWorkflow,
   parallelAnalysisWorkflow,
 } from "./workflows/content-workflow";
+import { paymentWorkflow } from "./workflows/payment-workflow";
 import { weatherWorkflow } from "./workflows/weather-workflow";
 
 export const mastra = new Mastra({
@@ -26,6 +27,7 @@ export const mastra = new Mastra({
     aiContentWorkflow,
     parallelAnalysisWorkflow,
     conditionalWorkflow,
+    paymentWorkflow,
   },
   agents: { weatherAgent, financialAgent, memoryAgent, learningAssistantAgent, contentAgent },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
