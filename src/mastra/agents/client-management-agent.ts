@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@lib/anthropic";
 import { Agent } from "@mastra/core/agent";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
+import { MCPClient } from "@mastra/mcp";
 import { Memory } from "@mastra/memory";
 import { claudeCliTool } from "../tools/claude-cli-tool";
 import { execSandboxScriptTool } from "../tools/exec-sandbox-script-tool";
@@ -47,6 +48,15 @@ const codingMemory = new Memory({
     },
   },
 });
+
+const mcpTools = await new MCPClient({
+  servers: {
+    zapier: {
+      url: new URL(process.env.ZAPIER_MCP_URL || ""),
+    },
+  },
+}).getTools();
+console.log("MCP Tools:", mcpTools);
 
 /**
  * Client Management Assistant
@@ -145,6 +155,7 @@ CONSTRAINTS:
   model: anthropic("claude-sonnet-4-5-20250929"),
 
   tools: {
+    ...mcpTools,
     claudeCliTool,
     execSandboxScriptTool,
   },
