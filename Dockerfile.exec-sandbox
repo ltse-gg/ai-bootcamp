@@ -1,0 +1,16 @@
+# Dockerfile for exec-sandbox
+# This image is used to execute generated .tsx scripts in an isolated environment
+
+FROM node:22-alpine
+
+# Install tsx globally for TypeScript execution
+RUN npm install -g tsx
+
+# Set working directory
+WORKDIR /sandbox
+
+# Run as non-root user for security
+USER node
+
+# Default command (will be overridden by docker run)
+CMD ["tsx"]
