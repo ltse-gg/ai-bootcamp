@@ -1,7 +1,7 @@
 import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore } from "@mastra/libsql";
 import { PinoLogger } from "@mastra/loggers";
-import { codingAgent } from "./agents/coding-agent";
+import { codingAgent } from "./agents/client-management-agent";
 import { financialAgent } from "./agents/financial-agent";
 import { learningAssistantAgent } from "./agents/learning-assistant";
 import { memoryAgent } from "./agents/memory-agent";

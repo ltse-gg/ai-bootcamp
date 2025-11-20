@@ -53,7 +53,6 @@ const claudeCliResponseSchema = z.object({
   permission_denials: z.array(z.any()).optional(),
   uuid: z.string().optional(),
 });
-type ClaudeCliResponse = z.infer<typeof claudeCliResponseSchema>;
 
 const CLAUDE_CLI_SANDBOX_DIR = process.env.CLAUDE_CLI_SANDBOX_DIR || "/tmp/claude-cli-sandbox";
 const CLAUDE_CLI_ALLOWED_TOOLS = "Bash,Read,Write,Edit,Glob,Grep";
@@ -66,7 +65,7 @@ const CLAUDE_CLI_MODEL = "haiku";
 export const claudeCliTool = createTool({
   id: "claude-cli-headless",
   description:
-    "Executes Claude Code CLI in headless mode to perform coding tasks. Claude CLI has access to file operations, git, bash, and other tools. Use this to delegate complex coding tasks.",
+    "Executes Claude Code CLI in headless mode to generate scripts for client and appointment data management. Claude CLI has full access to all client information, appointment data, and can perform file operations, bash commands, and code generation. Use this to create scripts that filter, analyze, or report on client/appointment data based on business requirements.",
   inputSchema: z.object({
     prompt: z.string().describe("The task or question to send to Claude CLI"),
     sessionId: z.string().optional().describe("Resume a specific session by ID"),
