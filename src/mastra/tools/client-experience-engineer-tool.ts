@@ -62,12 +62,12 @@ const CLAUDE_CLI_MODEL = "haiku";
  * Tool for executing Claude Code CLI in headless mode
  * Uses `claude -p` flag for non-interactive execution
  */
-export const claudeCliTool = createTool({
-  id: "claude-cli-headless",
+export const clientExperienceEngineerTool = createTool({
+  id: "client-experience-engineer",
   description:
-    "Executes Claude Code CLI in headless mode to generate scripts for client and appointment data management. Claude CLI has full access to all client information, appointment data, and can perform file operations, bash commands, and code generation. Use this to create scripts that filter, analyze, or report on client/appointment data based on business requirements.",
+    "Executes Client Experience Engineer in headless mode to generate scripts for client and appointment data management. The Client Experience Engineer has full access to all client information, appointment data, and can perform file operations, bash commands, and code generation. Use this to create scripts that filter, analyze, or report on client/appointment data based on business requirements.",
   inputSchema: z.object({
-    prompt: z.string().describe("The task or question to send to Claude CLI"),
+    prompt: z.string().describe("The task or question to send to Client Experience Engineer"),
     sessionId: z.string().optional().describe("Resume a specific session by ID"),
     systemPrompt: z.string().optional().describe("Additional system instructions to append"),
   }),
@@ -101,7 +101,7 @@ export const claudeCliTool = createTool({
     command += ` < /dev/null`;
 
     try {
-      console.log(`[Claude CLI Tool] Executing command: ${command}`);
+      console.log(`[Client Experience Engineer Tool] Executing command: ${command}`);
 
       const { stdout, stderr } = await execAsync(command, {
         cwd: CLAUDE_CLI_SANDBOX_DIR,
@@ -109,7 +109,7 @@ export const claudeCliTool = createTool({
         encoding: "utf8",
       });
 
-      console.log(`[Claude CLI Tool] Command completed`);
+      console.log(`[Client Experience Engineer Tool] Command completed`);
 
       // Check if stderr has warnings or errors
       const stderrWarning = stderr ? `stderr: ${stderr.trim()}` : undefined;
