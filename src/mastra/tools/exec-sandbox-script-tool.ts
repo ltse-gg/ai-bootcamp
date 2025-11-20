@@ -9,19 +9,19 @@ const CLAUDE_CLI_SANDBOX_DIR = process.env.CLAUDE_CLI_SANDBOX_DIR || "/tmp/claud
 const DEFAULT_TIMEOUT = 60000; // 60 seconds
 
 /**
- * Tool for executing generated .tsx TypeScript scripts in a sandboxed environment
- * Uses ./node_modules/.bin/tsx to execute the script
+ * Tool for executing generated .tsx TypeScript scripts in an isolated Docker container
+ * Uses the 'exec-sandbox' Docker image (node:22-alpine with tsx installed)
  * Retrieves businessToken and authToken from runtime context
+ * Containers are kept after execution for debugging (use 'docker logs <container-name>')
  */
 export const execSandboxScriptTool = createTool({
   id: "exec-sandbox-script",
   description:
-    "Executes a generated .tsx TypeScript script in a sandboxed environment with business and auth tokens. The script is executed using ./node_modules/.bin/tsx (which must be installed in the sandbox). Use this after a .tsx script has been generated to run it and return the results to the business owner. The script has access to all client and appointment data via businessToken and authToken environment variables.",
+    "Executes a generated .tsx TypeScript script in an isolated Docker container with business and auth tokens. Requires 'exec-sandbox' Docker image to be built from Dockerfile.exec-sandbox. The container persists after execution for debugging - use 'docker logs <container-name>' to inspect output. The script has access to all client and appointment data via businessToken and authToken environment variables. Use 'docker container prune' to clean up stopped containers.",
   inputSchema: z.object({
     scriptPath: z
       .string()
       .describe("Path to the .tsx script file to execute (relative to sandbox directory)"),
-    args: z.array(z.string()).optional().describe("Optional arguments to pass to the script"),
   }),
   outputSchema: z.object({
     success: z.boolean().describe("Whether the script executed successfully"),
@@ -29,9 +29,10 @@ export const execSandboxScriptTool = createTool({
     stderr: z.string().optional().describe("Standard error output if any"),
     exitCode: z.number().optional().describe("Script exit code"),
     error: z.string().optional().describe("Error message if execution failed"),
+    containerName: z.string().optional().describe("Docker container name for log inspection"),
   }),
   execute: async ({ context, runtimeContext }) => {
-    const { scriptPath, args = [] } = context;
+    const { scriptPath } = context;
 
     // Get tokens from runtime context
     const businessToken = runtimeContext?.get<string>("businessToken");
@@ -62,38 +63,53 @@ export const execSandboxScriptTool = createTool({
       };
     }
 
-    // Build the command
-    const escapedArgs = args.map((arg) => `${arg.replace(/"/g, '\\"')}`);
-    const command = `./node_modules/.bin/tsx "${scriptPath}" "${escapedArgs.join(" ")}"`;
+    // Generate unique container name with timestamp
+    const containerName = `exec-sandbox-${Date.now()}`;
 
-    console.log(`[Exec Sandbox Script] Executing: ${command}`);
-    console.log(`[Exec Sandbox Script] Working directory: ${CLAUDE_CLI_SANDBOX_DIR}`);
-    console.log(`[Exec Sandbox Script] Tokens available: businessToken, authToken`);
+    // Escape tokens for shell
+    const escapedBusinessToken = businessToken.replace(/"/g, '\\"');
+    const escapedAuthToken = authToken.replace(/"/g, '\\"');
+
+    // Build Docker command
+    const dockerArgs = [
+      "run",
+      `--name ${containerName}`,
+      `-e businessToken="${escapedBusinessToken}"`,
+      `-e authToken="${escapedAuthToken}"`,
+      `-v "${CLAUDE_CLI_SANDBOX_DIR}:/sandbox:ro"`,
+      `-w /sandbox`,
+      "exec-sandbox",
+      "tsx",
+      `"${scriptPath}"`,
+    ];
+    const command = `docker ${dockerArgs.join(" ")}`;
+
+    console.log(`[Exec Sandbox Script] Executing in Docker container: ${containerName}`);
+    console.log(`[Exec Sandbox Script] Command: ${command}`);
+    console.log(`[Exec Sandbox Script] Sandbox directory: ${CLAUDE_CLI_SANDBOX_DIR}`);
+    console.log(`[Exec Sandbox Script] Tokens: businessToken, authToken`);
 
     try {
       const { stdout, stderr } = await execAsync(command, {
-        cwd: CLAUDE_CLI_SANDBOX_DIR,
         timeout: DEFAULT_TIMEOUT,
         maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large outputs
         encoding: "utf8",
-        env: {
-          ...process.env, // Include system PATH and other essential env vars
-          businessToken,
-          authToken,
-        },
       });
 
-      console.log(`[Exec Sandbox Script] Execution completed successfully`);
+      console.log(`[Exec Sandbox Script] Container ${containerName} completed successfully`);
+      console.log(`[Exec Sandbox Script] Inspect logs: docker logs ${containerName}`);
 
       return {
         success: true,
         stdout: stdout.trim(),
         stderr: stderr ? stderr.trim() : undefined,
         exitCode: 0,
+        containerName,
       };
     } catch (error: any) {
       // exec throws on non-zero exit codes or timeout
-      console.error(`[Exec Sandbox Script] Execution failed:`, error.message);
+      console.error(`[Exec Sandbox Script] Container ${containerName} failed:`, error.message);
+      console.error(`[Exec Sandbox Script] Inspect logs: docker logs ${containerName}`);
 
       return {
         success: false,
@@ -101,6 +117,7 @@ export const execSandboxScriptTool = createTool({
         stderr: error.stderr?.trim() || "",
         exitCode: error.code || -1,
         error: error.message,
+        containerName,
       };
     }
   },
