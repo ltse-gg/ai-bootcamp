@@ -1,10 +1,7 @@
 import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore } from "@mastra/libsql";
 import { PinoLogger } from "@mastra/loggers";
-import { codingAgent } from "./agents/client-management-agent";
-import { financialAgent } from "./agents/financial-agent";
-import { learningAssistantAgent } from "./agents/learning-assistant";
-import { memoryAgent } from "./agents/memory-agent";
+import { clientManagementAgent } from "./agents/client-management-agent";
 import { weatherAgent } from "./agents/weather-agent";
 import {
   completenessScorer,
@@ -30,11 +27,11 @@ export const mastra = new Mastra({
     paymentWorkflow,
   },
   agents: {
-    codingAgent,
+    clientManagementAgent,
     weatherAgent,
-    financialAgent,
-    memoryAgent,
-    learningAssistantAgent,
+    // financialAgent,
+    // memoryAgent,
+    // learningAssistantAgent,
   },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   storage: new LibSQLStore({

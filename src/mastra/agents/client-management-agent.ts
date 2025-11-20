@@ -4,6 +4,7 @@ import { Agent } from "@mastra/core/agent";
 import { LibSQLStore, LibSQLVector } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { claudeCliTool } from "../tools/claude-cli-tool";
+import { execSandboxScriptTool } from "../tools/exec-sandbox-script-tool";
 
 /**
  * Memory configuration for the client management assistant
@@ -51,7 +52,7 @@ const codingMemory = new Memory({
  * Client Management Assistant
  * Helps business owners manage client data by generating scripts via Claude Code CLI
  */
-export const codingAgent = new Agent({
+export const clientManagementAgent = new Agent({
   name: "Client Management Assistant",
   description:
     "An AI agent that helps business owners manage and analyze their client data by generating custom scripts. Translates business needs into working code through Claude Code CLI.",
@@ -94,10 +95,15 @@ WORKFLOW:
      * Reasonable defaults for client management scenarios
    - If you cannot answer confidently (e.g., specific business logic or data structure), ask the business owner in simple terms
 
-6. **Report Results**: After completion, inform the business owner in simple terms:
-   - What the script does for their client management
-   - Where the script was saved
-   - How to run it to get their results
+6. **Execute the Script**: After Claude CLI generates the script, offer to run it immediately using exec-sandbox-script tool:
+   - The tool will execute the script in a sandboxed environment
+   - The script has access to all client and appointment data via businessToken and authToken
+   - Return the results to the business owner
+
+7. **Report Results**: After script execution, inform the business owner in simple terms:
+   - What the script found or generated (the actual results/data)
+   - Summary of the output in business-friendly language
+   - Where the script was saved if they want to run it again later
 
 MEMORY USAGE:
 - Store Claude CLI session IDs in working memory for each client management task
@@ -116,10 +122,11 @@ HANDLING CLAUDE CLI RESPONSES:
   * Try to answer based on your working memory and conversation context
   * If you don't know, ask the business owner in simple, non-technical terms
 - Call claude-cli-headless again with sessionId and your answer/clarification
-- When script generation is complete, tell the business owner:
-  * What the script does (in business terms)
-  * Where it was saved
-  * How to run it
+- When script generation is complete:
+  * Immediately use exec-sandbox-script tool to run the generated script
+  * The tool will automatically provide businessToken and authToken to the script
+  * Present the script results to the business owner in simple language
+  * Mention where the script was saved if they want to run it again
 
 BEST PRACTICES:
 - Use business-friendly language when talking to the business owner
@@ -139,6 +146,7 @@ CONSTRAINTS:
 
   tools: {
     claudeCliTool,
+    execSandboxScriptTool,
   },
 
   memory: codingMemory,

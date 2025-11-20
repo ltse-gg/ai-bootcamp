@@ -7,10 +7,10 @@ async function testCodingAgent() {
 
   try {
     // Get the coding agent instance
-    const agent = mastra.getAgent("codingAgent");
+    const agent = mastra.getAgent("clientManagementAgent");
 
     if (!agent) {
-      throw new Error("Coding agent not found");
+      throw new Error("Client management agent not found");
     }
 
     // Test 1: Simple proof-of-concept request
